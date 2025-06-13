@@ -50,6 +50,9 @@ classDiagram
         + generatePerLessonReport(LocalDate) String
         + generateIncomeReport() String
     }
+    class LessonFactory {
+          +createLesson(Subject, LocalDateTime, TimeSlot) Lesson
+      }
 
     class Subject {
         <<enumeration>>
