@@ -1,12 +1,19 @@
 package examberry.service;
 
-import examberry.model.*;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import examberry.model.Booking;
+import examberry.model.Lesson;
+import examberry.model.Review;
+import examberry.model.Status;
+import examberry.model.Student;
+import examberry.model.Subject;
+import examberry.model.TimeSlot;
+import examberry.model.Timetable;
 
 public class BookingService {
     private List<Student> students;
@@ -30,11 +37,14 @@ public class BookingService {
     }
 
     public Booking bookLesson(Student student, Lesson lesson) {
-        // Check capacity and conflicts
         if (bookings.get(lesson).size() >= lesson.getMaxCapacity()) {
             return null;
         }
         for (Booking b : student.getBookings()) {
+            if (b.getStatus() != Status.CANCELLED &&
+                    b.getLesson().equals(lesson)) {
+                return null; // Duplicate booking
+            }
             if (b.getStatus() != Status.CANCELLED &&
                     b.getLesson().getDateTime().equals(lesson.getDateTime())) {
                 return null; // Time conflict
@@ -67,6 +77,10 @@ public class BookingService {
     }
 
     public Review submitReview(Student student, Lesson lesson, String text, int rating) {
+        boolean attended = lesson.getBookings().stream()
+                .anyMatch(b -> b.getStudent().equals(student) && b.getStatus() == Status.ATTENDED);
+        if (!attended)
+            throw new IllegalStateException("Student must attend lesson to submit review");
         return student.submitReview(lesson, text, rating);
     }
 
