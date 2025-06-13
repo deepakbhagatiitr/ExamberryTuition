@@ -1,0 +1,22 @@
+# Java
+*.class
+*.jar
+out/
+
+# IDE
+.idea/
+*.iml
+
+# Maven
+target/
+pom.xml.versionsBackup
+
+# Docs
+docs/report.pdf
+docs/screenshots/
+
+# Screencast
+screencast/
+
+# Misc
+.DS_Store

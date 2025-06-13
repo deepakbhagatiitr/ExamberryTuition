@@ -1,0 +1,83 @@
+classDiagram
+    class Student {
+        - String name
+        - String gender
+        - LocalDate dob
+        - String address
+        - String emergencyContact
+        + bookLesson(Lesson) Booking
+        + submitReview(Lesson, String, int) Review
+        + getBookings() List~Booking~
+    }
+
+    class Lesson {
+        - Subject subject
+        - LocalDateTime dateTime
+        - TimeSlot slot
+        - double price
+        - int maxCapacity
+        - List~Booking~ bookings
+        + addBooking(Booking) boolean
+        + checkIn(Student) boolean
+        + getAverageRating() double
+        + getStudentCount() int
+    }
+
+    class Booking {
+        - Student student
+        - Lesson lesson
+        - Status status
+        + reschedule(Lesson) boolean
+        + cancel() void
+        + setStatus(Status) void
+    }
+
+    class Review {
+        - Student student
+        - Lesson lesson
+        - String text
+        - int rating
+    }
+
+    class Timetable {
+        - List~Lesson~ lessons
+        + addLesson(Lesson) void
+        + getLessonsByDate(LocalDate) List~Lesson~
+        + getLessonsBySubject(Subject) List~Lesson~
+    }
+
+    class ReportGenerator {
+        + generatePerLessonReport(LocalDate) String
+        + generateIncomeReport() String
+    }
+
+    class Subject {
+        <<enumeration>>
+        ENGLISH
+        MATHS
+        VERBAL_REASONING
+        NON_VERBAL_REASONING
+    }
+
+    class TimeSlot {
+        <<enumeration>>
+        MORNING
+        AFTERNOON
+    }
+
+    class Status {
+        <<enumeration>>
+        BOOKED
+        ATTENDED
+        CANCELLED
+    }
+
+    Timetable --> Lesson : contains
+    Lesson --> Booking : has
+    Student --> Booking : books
+    Student --> Review : submits
+    Lesson --> Review : receives
+    Booking --> Student : student
+    Booking --> Lesson : lesson
+    Review --> Student : by
+    Review --> Lesson : for
