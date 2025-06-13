@@ -62,13 +62,26 @@ public class BookingService {
     public boolean rescheduleBooking(Booking booking, Lesson newLesson) {
         if (booking.getStatus() != Status.BOOKED)
             return false;
+        Lesson oldLesson = booking.getLesson();
+        if (reschedule(booking, newLesson)) {
+            bookings.get(oldLesson).remove(booking);
+            bookings.get(newLesson).add(booking);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean reschedule(Booking booking, Lesson newLesson) {
         return booking.reschedule(newLesson);
     }
 
     public boolean cancelBooking(Booking booking) {
         if (booking.getStatus() != Status.BOOKED)
             return false;
+        Lesson lesson = booking.getLesson();
         booking.cancel();
+        bookings.get(lesson).remove(booking);
+        lesson.getBookings().remove(booking);
         return true;
     }
 
