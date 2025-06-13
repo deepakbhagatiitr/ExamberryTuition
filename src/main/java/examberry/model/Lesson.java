@@ -74,6 +74,10 @@ public class Lesson {
         return price;
     }
 
+    public int getMaxCapacity() {
+        return maxCapacity;
+    }
+
     public List<Booking> getBookings() {
         return Collections.unmodifiableList(bookings);
     }
