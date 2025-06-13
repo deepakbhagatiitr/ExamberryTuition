@@ -2,6 +2,7 @@ package examberry.model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Lesson {
@@ -29,6 +30,10 @@ public class Lesson {
         return true;
     }
 
+    public boolean removeBooking(Booking booking) {
+        return bookings.remove(booking);
+    }
+
     public boolean checkIn(Student student) {
         for (Booking booking : bookings) {
             if (booking.getStudent().equals(student) && booking.getStatus() == Status.BOOKED) {
@@ -52,9 +57,7 @@ public class Lesson {
     public int getStudentCount() {
         return bookings.size();
     }
-public int getMaxCapacity() {
-    return maxCapacity;
-}
+
     public Subject getSubject() {
         return subject;
     }
@@ -72,6 +75,6 @@ public int getMaxCapacity() {
     }
 
     public List<Booking> getBookings() {
-        return new ArrayList<>(bookings);
+        return Collections.unmodifiableList(bookings);
     }
 }

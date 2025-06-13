@@ -11,11 +11,10 @@ public class Booking {
         this.status = Status.BOOKED;
     }
 
-    public boolean reschedule(Lesson oldLesson, Lesson newLesson) {
+    public boolean reschedule(Lesson newLesson) {
         if (newLesson.getSubject() != lesson.getSubject() || !newLesson.addBooking(this)) {
             return false;
         }
-        oldLesson.getBookings().remove(this);
         lesson = newLesson;
         return true;
     }

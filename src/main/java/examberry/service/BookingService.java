@@ -1,19 +1,12 @@
 package examberry.service;
 
+import examberry.model.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import examberry.model.Booking;
-import examberry.model.Lesson;
-import examberry.model.Review;
-import examberry.model.Status;
-import examberry.model.Student;
-import examberry.model.Subject;
-import examberry.model.TimeSlot;
-import examberry.model.Timetable;
 
 public class BookingService {
     private List<Student> students;
@@ -63,7 +56,8 @@ public class BookingService {
         if (booking.getStatus() != Status.BOOKED)
             return false;
         Lesson oldLesson = booking.getLesson();
-        if (booking.reschedule(oldLesson, newLesson)) {
+        if (booking.reschedule(newLesson)) {
+            oldLesson.removeBooking(booking);
             bookings.get(oldLesson).remove(booking);
             bookings.get(newLesson).add(booking);
             return true;
@@ -77,7 +71,7 @@ public class BookingService {
         Lesson lesson = booking.getLesson();
         booking.cancel();
         bookings.get(lesson).remove(booking);
-        lesson.getBookings().remove(booking);
+        lesson.removeBooking(booking);
         return true;
     }
 
