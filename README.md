@@ -1,6 +1,6 @@
 # Examberry Tuition Centre
 
-This is a Java program for managing weekend tuition bookings at Examberry Tuition Centre, developed for the 7COM1025 Ref/Def Coursework.
+This is a Java program for managing weekend tuition bookings at Examberry Tuition Centre
 
 ## Structure
 - `src/main/java/examberry/`: Source code (model, service, util packages).
