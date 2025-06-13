@@ -88,6 +88,8 @@ public class BookingServiceTest {
         boolean result = service.rescheduleBooking(booking, lesson2);
         assertTrue(result);
         assertEquals(lesson2, booking.getLesson());
+        assertEquals(0, lesson1.getStudentCount());
+        assertEquals(1, lesson2.getStudentCount());
     }
 
     @Test
