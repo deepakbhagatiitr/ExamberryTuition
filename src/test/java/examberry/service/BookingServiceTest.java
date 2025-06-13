@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -75,11 +76,30 @@ public class BookingServiceTest {
     }
 
     @Test
+    void testBookLessonDuplicate() {
+        service.bookLesson(student, lesson1);
+        Booking booking = service.bookLesson(student, lesson1);
+        assertNull(booking);
+    }
+
+    @Test
     void testRescheduleBooking() {
         Booking booking = service.bookLesson(student, lesson1);
         boolean result = service.rescheduleBooking(booking, lesson2);
         assertTrue(result);
         assertEquals(lesson2, booking.getLesson());
+    }
+
+    @Test
+    void testRescheduleBookingFullLesson() {
+        for (int i = 0; i < 4; i++) {
+            Student s = new Student("Student" + i, "M", LocalDate.now(), "Addr", "Contact");
+            service.addStudent(s);
+            assertNotNull(service.bookLesson(s, lesson2));
+        }
+        Booking booking = service.bookLesson(student, lesson1);
+        boolean result = service.rescheduleBooking(booking, lesson2);
+        assertFalse(result);
     }
 
     @Test
