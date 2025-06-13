@@ -120,7 +120,12 @@ public class Main {
                 "741 Ash St", "Parent: 555-0110"));
     }
 
+    private static void displayStudents() {
+        System.out.println("Available students: Alice Smith, Bob Johnson, Clara Lee, David Brown, Emma Wilson");
+    }
+
     private static void handleBooking(Scanner scanner, BookingService service) {
+        displayStudents();
         System.out.print("Enter student name: ");
         String name = scanner.nextLine();
         System.out.print("Enter subject (ENGLISH, MATHS, VERBAL_REASONING, NON_VERBAL_REASONING): ");
@@ -147,6 +152,7 @@ public class Main {
     }
 
     private static void handleReschedule(Scanner scanner, BookingService service) {
+        displayStudents();
         System.out.print("Enter student name: ");
         String name = scanner.nextLine();
         System.out.print("Enter current lesson date (YYYY-MM-DD): ");
@@ -184,6 +190,7 @@ public class Main {
     }
 
     private static void handleCancel(Scanner scanner, BookingService service) {
+        displayStudents();
         System.out.print("Enter student name: ");
         String name = scanner.nextLine();
         System.out.print("Enter lesson date (YYYY-MM-DD): ");
@@ -216,6 +223,7 @@ public class Main {
     }
 
     private static void handleCheckIn(Scanner scanner, BookingService service) {
+        displayStudents();
         System.out.print("Enter student name: ");
         String name = scanner.nextLine();
         System.out.print("Enter lesson date (YYYY-MM-DD): ");
@@ -241,6 +249,7 @@ public class Main {
     }
 
     private static void handleReview(Scanner scanner, BookingService service) {
+        displayStudents();
         System.out.print("Enter student name: ");
         String name = scanner.nextLine();
         System.out.print("Enter lesson date (YYYY-MM-DD): ");
@@ -269,8 +278,8 @@ public class Main {
                 try {
                     service.submitReview(student, lesson, text, rating);
                     System.out.println("Review submitted!");
-                } catch (IllegalArgumentException e) {
-                    System.out.println("Invalid rating: " + e.getMessage());
+                } catch (IllegalArgumentException | IllegalStateException e) {
+                    System.out.println("Error: " + e.getMessage());
                 }
             } else {
                 System.out.println("Invalid student or lesson.");
