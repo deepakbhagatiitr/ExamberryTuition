@@ -1,12 +1,19 @@
 package examberry.service;
 
-import examberry.model.*;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import examberry.model.Booking;
+import examberry.model.Lesson;
+import examberry.model.Review;
+import examberry.model.Status;
+import examberry.model.Student;
+import examberry.model.Subject;
+import examberry.model.TimeSlot;
+import examberry.model.Timetable;
 
 public class BookingService {
     private List<Student> students;
