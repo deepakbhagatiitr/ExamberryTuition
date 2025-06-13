@@ -1,30 +1,31 @@
 package examberry;
 
-import examberry.model.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.Scanner;
+
+import examberry.model.Booking;
+import examberry.model.Lesson;
+import examberry.model.Status;
+import examberry.model.Student;
+import examberry.model.Subject;
+import examberry.model.TimeSlot;
+import examberry.model.Timetable;
 import examberry.service.BookingService;
 import examberry.service.ReportGenerator;
 import examberry.util.TimetableGenerator;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Scanner;
-
 public class Main {
     public static void main(String[] args) {
-        // Initialize services
         BookingService bookingService = new BookingService();
         ReportGenerator reportGenerator = new ReportGenerator(bookingService);
 
-        // Generate timetable (8 weekends)
         Timetable timetable = TimetableGenerator.generateTimetable(
                 LocalDate.of(2025, 6, 7), 8);
         bookingService.setTimetable(timetable);
 
-        // Preload 10 students
         preloadStudents(bookingService);
 
-        // Console UI
         Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.println("\nExamberry Tuition Centre");
@@ -38,8 +39,15 @@ public class Main {
             System.out.println("8. Exit");
             System.out.print("Choose an option: ");
 
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            int choice;
+            try {
+                choice = scanner.nextInt();
+                scanner.nextLine();
+            } catch (Exception e) {
+                System.out.println("Invalid option. Please enter a number.");
+                scanner.nextLine();
+                continue;
+            }
 
             switch (choice) {
                 case 1:
@@ -59,8 +67,12 @@ public class Main {
                     break;
                 case 6:
                     System.out.print("Enter date (YYYY-MM-DD): ");
-                    LocalDate date = LocalDate.parse(scanner.nextLine());
-                    System.out.println(reportGenerator.generatePerLessonReport(date));
+                    try {
+                        LocalDate date = LocalDate.parse(scanner.nextLine());
+                        System.out.println(reportGenerator.generatePerLessonReport(date));
+                    } catch (DateTimeParseException e) {
+                        System.out.println("Invalid date format. Use YYYY-MM-DD.");
+                    }
                     break;
                 case 7:
                     System.out.println(reportGenerator.generateIncomeReport());
@@ -112,19 +124,25 @@ public class Main {
         System.out.print("Enter student name: ");
         String name = scanner.nextLine();
         System.out.print("Enter subject (ENGLISH, MATHS, VERBAL_REASONING, NON_VERBAL_REASONING): ");
-        Subject subject = Subject.valueOf(scanner.nextLine().toUpperCase());
-        System.out.print("Enter date (YYYY-MM-DD): ");
-        LocalDate date = LocalDate.parse(scanner.nextLine());
-        System.out.print("Enter slot (MORNING, AFTERNOON): ");
-        TimeSlot slot = TimeSlot.valueOf(scanner.nextLine().toUpperCase());
+        try {
+            Subject subject = Subject.valueOf(scanner.nextLine().toUpperCase());
+            System.out.print("Enter date (YYYY-MM-DD): ");
+            LocalDate date = LocalDate.parse(scanner.nextLine());
+            System.out.print("Enter slot (MORNING, AFTERNOON): ");
+            TimeSlot slot = TimeSlot.valueOf(scanner.nextLine().toUpperCase());
 
-        Student student = service.getStudentByName(name);
-        Lesson lesson = service.getLesson(subject, date, slot);
-        if (student != null && lesson != null) {
-            Booking booking = service.bookLesson(student, lesson);
-            System.out.println(booking != null ? "Booking successful!" : "Booking failed.");
-        } else {
-            System.out.println("Invalid student or lesson.");
+            Student student = service.getStudentByName(name);
+            Lesson lesson = service.getLesson(subject, date, slot);
+            if (student != null && lesson != null) {
+                Booking booking = service.bookLesson(student, lesson);
+                System.out.println(booking != null ? "Booking successful!" : "Booking failed.");
+            } else {
+                System.out.println("Invalid student or lesson.");
+            }
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format. Use YYYY-MM-DD.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid subject or slot.");
         }
     }
 
@@ -132,30 +150,36 @@ public class Main {
         System.out.print("Enter student name: ");
         String name = scanner.nextLine();
         System.out.print("Enter current lesson date (YYYY-MM-DD): ");
-        LocalDate currentDate = LocalDate.parse(scanner.nextLine());
-        System.out.print("Enter current lesson subject: ");
-        Subject subject = Subject.valueOf(scanner.nextLine().toUpperCase());
-        System.out.print("Enter current slot (MORNING, AFTERNOON): ");
-        TimeSlot currentSlot = TimeSlot.valueOf(scanner.nextLine().toUpperCase());
-        System.out.print("Enter new lesson date (YYYY-MM-DD): ");
-        LocalDate newDate = LocalDate.parse(scanner.nextLine());
-        System.out.print("Enter new slot (MORNING, AFTERNOON): ");
-        TimeSlot newSlot = TimeSlot.valueOf(scanner.nextLine().toUpperCase());
+        try {
+            LocalDate currentDate = LocalDate.parse(scanner.nextLine());
+            System.out.print("Enter current lesson subject: ");
+            Subject subject = Subject.valueOf(scanner.nextLine().toUpperCase());
+            System.out.print("Enter current slot (MORNING, AFTERNOON): ");
+            TimeSlot currentSlot = TimeSlot.valueOf(scanner.nextLine().toUpperCase());
+            System.out.print("Enter new lesson date (YYYY-MM-DD): ");
+            LocalDate newDate = LocalDate.parse(scanner.nextLine());
+            System.out.print("Enter new slot (MORNING, AFTERNOON): ");
+            TimeSlot newSlot = TimeSlot.valueOf(scanner.nextLine().toUpperCase());
 
-        Student student = service.getStudentByName(name);
-        Lesson currentLesson = service.getLesson(subject, currentDate, currentSlot);
-        Lesson newLesson = service.getLesson(subject, newDate, newSlot);
-        if (student != null && currentLesson != null && newLesson != null) {
-            Booking booking = student.getBookings().stream()
-                    .filter(b -> b.getLesson().equals(currentLesson) && b.getStatus() == Status.BOOKED)
-                    .findFirst().orElse(null);
-            if (booking != null && service.rescheduleBooking(booking, newLesson)) {
-                System.out.println("Reschedule successful!");
+            Student student = service.getStudentByName(name);
+            Lesson currentLesson = service.getLesson(subject, currentDate, currentSlot);
+            Lesson newLesson = service.getLesson(subject, newDate, newSlot);
+            if (student != null && currentLesson != null && newLesson != null) {
+                Booking booking = student.getBookings().stream()
+                        .filter(b -> b.getLesson().equals(currentLesson) && b.getStatus() == Status.BOOKED)
+                        .findFirst().orElse(null);
+                if (booking != null && service.rescheduleBooking(booking, newLesson)) {
+                    System.out.println("Reschedule successful!");
+                } else {
+                    System.out.println("Reschedule failed.");
+                }
             } else {
-                System.out.println("Reschedule failed.");
+                System.out.println("Invalid student or lesson.");
             }
-        } else {
-            System.out.println("Invalid student or lesson.");
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format. Use YYYY-MM-DD.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid subject or slot.");
         }
     }
 
@@ -163,25 +187,31 @@ public class Main {
         System.out.print("Enter student name: ");
         String name = scanner.nextLine();
         System.out.print("Enter lesson date (YYYY-MM-DD): ");
-        LocalDate date = LocalDate.parse(scanner.nextLine());
-        System.out.print("Enter lesson subject: ");
-        Subject subject = Subject.valueOf(scanner.nextLine().toUpperCase());
-        System.out.print("Enter slot (MORNING, AFTERNOON): ");
-        TimeSlot slot = TimeSlot.valueOf(scanner.nextLine().toUpperCase());
+        try {
+            LocalDate date = LocalDate.parse(scanner.nextLine());
+            System.out.print("Enter lesson subject: ");
+            Subject subject = Subject.valueOf(scanner.nextLine().toUpperCase());
+            System.out.print("Enter slot (MORNING, AFTERNOON): ");
+            TimeSlot slot = TimeSlot.valueOf(scanner.nextLine().toUpperCase());
 
-        Student student = service.getStudentByName(name);
-        Lesson lesson = service.getLesson(subject, date, slot);
-        if (student != null && lesson != null) {
-            Booking booking = student.getBookings().stream()
-                    .filter(b -> b.getLesson().equals(lesson) && b.getStatus() == Status.BOOKED)
-                    .findFirst().orElse(null);
-            if (booking != null && service.cancelBooking(booking)) {
-                System.out.println("Cancellation successful!");
+            Student student = service.getStudentByName(name);
+            Lesson lesson = service.getLesson(subject, date, slot);
+            if (student != null && lesson != null) {
+                Booking booking = student.getBookings().stream()
+                        .filter(b -> b.getLesson().equals(lesson) && b.getStatus() == Status.BOOKED)
+                        .findFirst().orElse(null);
+                if (booking != null && service.cancelBooking(booking)) {
+                    System.out.println("Cancellation successful!");
+                } else {
+                    System.out.println("Cancellation failed.");
+                }
             } else {
-                System.out.println("Cancellation failed.");
+                System.out.println("Invalid student or lesson.");
             }
-        } else {
-            System.out.println("Invalid student or lesson.");
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format. Use YYYY-MM-DD.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid subject or slot.");
         }
     }
 
@@ -189,18 +219,24 @@ public class Main {
         System.out.print("Enter student name: ");
         String name = scanner.nextLine();
         System.out.print("Enter lesson date (YYYY-MM-DD): ");
-        LocalDate date = LocalDate.parse(scanner.nextLine());
-        System.out.print("Enter lesson subject: ");
-        Subject subject = Subject.valueOf(scanner.nextLine().toUpperCase());
-        System.out.print("Enter slot (MORNING, AFTERNOON): ");
-        TimeSlot slot = TimeSlot.valueOf(scanner.nextLine().toUpperCase());
+        try {
+            LocalDate date = LocalDate.parse(scanner.nextLine());
+            System.out.print("Enter lesson subject: ");
+            Subject subject = Subject.valueOf(scanner.nextLine().toUpperCase());
+            System.out.print("Enter slot (MORNING, AFTERNOON): ");
+            TimeSlot slot = TimeSlot.valueOf(scanner.nextLine().toUpperCase());
 
-        Student student = service.getStudentByName(name);
-        Lesson lesson = service.getLesson(subject, date, slot);
-        if (student != null && lesson != null && service.checkIn(student, lesson)) {
-            System.out.println("Check-in successful!");
-        } else {
-            System.out.println("Check-in failed.");
+            Student student = service.getStudentByName(name);
+            Lesson lesson = service.getLesson(subject, date, slot);
+            if (student != null && lesson != null && service.checkIn(student, lesson)) {
+                System.out.println("Check-in successful!");
+            } else {
+                System.out.println("Check-in failed.");
+            }
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format. Use YYYY-MM-DD.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid subject or slot.");
         }
     }
 
@@ -208,28 +244,41 @@ public class Main {
         System.out.print("Enter student name: ");
         String name = scanner.nextLine();
         System.out.print("Enter lesson date (YYYY-MM-DD): ");
-        LocalDate date = LocalDate.parse(scanner.nextLine());
-        System.out.print("Enter lesson subject: ");
-        Subject subject = Subject.valueOf(scanner.nextLine().toUpperCase());
-        System.out.print("Enter slot (MORNING, AFTERNOON): ");
-        TimeSlot slot = TimeSlot.valueOf(scanner.nextLine().toUpperCase());
-        System.out.print("Enter review text: ");
-        String text = scanner.nextLine();
-        System.out.print("Enter rating (1-5): ");
-        int rating = scanner.nextInt();
-        scanner.nextLine();
-
-        Student student = service.getStudentByName(name);
-        Lesson lesson = service.getLesson(subject, date, slot);
-        if (student != null && lesson != null) {
+        try {
+            LocalDate date = LocalDate.parse(scanner.nextLine());
+            System.out.print("Enter lesson subject: ");
+            Subject subject = Subject.valueOf(scanner.nextLine().toUpperCase());
+            System.out.print("Enter slot (MORNING, AFTERNOON): ");
+            TimeSlot slot = TimeSlot.valueOf(scanner.nextLine().toUpperCase());
+            System.out.print("Enter review text: ");
+            String text = scanner.nextLine();
+            System.out.print("Enter rating (1-5): ");
+            int rating;
             try {
-                service.submitReview(student, lesson, text, rating);
-                System.out.println("Review submitted!");
-            } catch (IllegalArgumentException e) {
-                System.out.println("Invalid rating: " + e.getMessage());
+                rating = scanner.nextInt();
+                scanner.nextLine();
+            } catch (Exception e) {
+                System.out.println("Invalid rating. Enter a number between 1 and 5.");
+                scanner.nextLine();
+                return;
             }
-        } else {
-            System.out.println("Invalid student or lesson.");
+
+            Student student = service.getStudentByName(name);
+            Lesson lesson = service.getLesson(subject, date, slot);
+            if (student != null && lesson != null) {
+                try {
+                    service.submitReview(student, lesson, text, rating);
+                    System.out.println("Review submitted!");
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Invalid rating: " + e.getMessage());
+                }
+            } else {
+                System.out.println("Invalid student or lesson.");
+            }
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format. Use YYYY-MM-DD.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid subject or slot.");
         }
     }
 }
